@@ -1,0 +1,13 @@
+node_modules
+.expo
+.git
+.env
+.env.*
+!.env.example
+dist
+web-build
+android
+ios
+.eas
+*.log
+*.local
