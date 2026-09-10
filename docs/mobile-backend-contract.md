@@ -2,7 +2,7 @@
 
 Synchronized from the current backend route/controller/validation/Swagger source on 2026-07-11. The backend domain routes are the source of truth; this file only records what this mobile vertical slice uses.
 
-Base URL is configured by `EXPO_PUBLIC_API_URL` and must include `/api`.
+The base URL is resolved centrally and lazily in `src/config/env.ts`. LAN mode derives the host from Expo SDK 54's Metro/experience runtime URLs and appends the configured backend port plus `/api`. Deferring resolution until a request prevents Expo Router web/static imports from requiring a native Metro manifest. Tunnel/remote mode requires `EXPO_PUBLIC_API_URL` to be a complete HTTPS URL ending in `/api`.
 
 ## Login
 

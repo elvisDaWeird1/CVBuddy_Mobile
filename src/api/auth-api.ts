@@ -14,8 +14,8 @@ export const login = async (email: string, password: string) => {
   return response.data;
 };
 
-export const getCurrentAccount = async (token: string) => {
-  const response = await apiRequest<CurrentAccountData>("/auth/me", { token });
+export const getCurrentAccount = async (token: string, signal?: AbortSignal) => {
+  const response = await apiRequest<CurrentAccountData>("/auth/me", { signal, token });
 
   if (!response.data) {
     throw new Error("Current account response did not include account data.");

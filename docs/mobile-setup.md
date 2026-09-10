@@ -15,7 +15,7 @@ It is not the full Portfolio editor.
 
 ## Versions and package manager
 
-- Expo SDK: 54 (`expo ~54.0.35` after Expo CLI normalization).
+- Expo SDK: 54 (`expo ~54.0.36` after Expo CLI normalization).
 - React Native: `0.81.5`.
 - React: `19.1.0`.
 - Package manager: npm, with committed `package-lock.json`.
@@ -30,23 +30,35 @@ npm ci
 copy .env.example .env
 ```
 
-Set the phone-reachable backend URL in `.env`:
+LAN mode is the default for local development:
 
 ```env
-EXPO_PUBLIC_API_URL=http://192.168.x.x:5000/api
+EXPO_PUBLIC_API_MODE=lan
+EXPO_PUBLIC_API_PORT=5000
+EXPO_PUBLIC_API_URL=
 ```
 
-The app removes trailing slashes and fails clearly in development when the variable is absent. Real `.env` files are ignored.
+In LAN mode, the app resolves the host lazily when the first API request starts. It prefers `Constants.expoConfig.hostUri`, then falls back to the SDK 54 runtime URLs (`Constants.linkingUri` and `Constants.experienceUrl`) and Expo Go's `debuggerHost`. The lazy lookup is intentional: Expo Router's web/static render can import the API module before a Metro host exists. The app extracts the runtime hostname and builds `http://<metro-host>:<port>/api`. No LAN address is stored in source or `.env`. The phone and computer must still be on the same LAN, Windows Firewall must allow the backend port, and the backend must listen on `0.0.0.0`.
 
-The phone cannot use `localhost` to reach a backend running on the development computer. On Windows, find the LAN IPv4 address with:
+Use tunnel mode when the phone and computer are on different networks, when the phone uses cellular data, or when the connection changes frequently:
+
+```env
+EXPO_PUBLIC_API_MODE=tunnel
+EXPO_PUBLIC_API_PORT=5000
+EXPO_PUBLIC_API_URL=https://api-dev.example.com/api
+```
+
+The tunnel URL must use HTTPS and include `/api`. Replace the example hostname with the fixed hostname configured for the named Cloudflare Tunnel. Real `.env` files and tunnel tokens are ignored by Git. The client rejects malformed URLs, credentials, query strings, fragments, insecure tunnel URLs, missing `/api`, and LAN mode in production.
+
+Verify the selected backend before login:
 
 ```powershell
-ipconfig
+Invoke-WebRequest -UseBasicParsing "http://localhost:5000/api/health"
+# Tunnel mode:
+Invoke-WebRequest -UseBasicParsing "https://api-dev.example.com/api/health"
 ```
 
-Use the active adapter's IPv4 address. The phone and computer must be on the same LAN, Windows Firewall must allow the backend port (normally 5000), and the backend must be running on a reachable interface. The current Node server uses `app.listen(PORT)` and Docker publishes port 5000. If the backend is bound only to `127.0.0.1`, change the local server binding/configuration outside this mobile task or use a backend tunnel/deployment with HTTPS.
-
-Android Emulator may use `10.0.2.2` for a host-machine API; other emulator setups can differ. iOS Simulator can usually use the host's localhost, while a physical iPhone needs the computer's LAN IP. Expo tunnel only tunnels Metro/project loading; it does not make the backend API public. If LAN access is unavailable, use a separate backend tunnel or deploy the backend to an HTTPS environment. This task does not create a paid tunnel service.
+Expo's `--tunnel` flag only tunnels Metro. This project pairs it with an independently configured backend Cloudflare Tunnel. A LAN URL cannot reach a laptop from cellular data or an unrelated Wi-Fi network.
 
 ## Run with Expo Go 54
 
@@ -60,7 +72,9 @@ Scan the QR code with Expo Go 54. The primary development path is a real Android
 npm run start:tunnel
 ```
 
-Tunnel mode helps the device load Metro; the API URL still needs to point to a reachable backend.
+`start:lan` sets API mode to LAN and starts Metro with `--lan`. `start:tunnel` sets API mode to tunnel and starts Metro with `--tunnel`; it requires the fixed backend HTTPS URL in `mobile/.env`. A full Expo Go reload is required after changing public environment variables. If both devices move to a new LAN, reconnect/reload Expo Go so it receives the new Metro `hostUri`; use tunnel mode for seamless Wi-Fi-to-cellular switching.
+
+If an older bundle reports `Expo did not provide a Metro host` together with `Web Bundled ... .expo/static-tmp/_error.js`, stop that Metro process and restart once with `npm run start:lan -- --clear`. The current implementation does not resolve the LAN URL during module import, so web/static rendering no longer fails merely because `hostUri` is unavailable there.
 
 `npm run ios` opens the iOS simulator workflow only where macOS/Xcode is available. Windows cannot local-build iOS. Android commands require the relevant local Android tooling; Expo Go on a physical device does not require an Android native build.
 
@@ -129,7 +143,7 @@ Move from Expo Go to a development build when a required native library is not i
 
 The following must be checked on a device because this workspace cannot verify a physical camera:
 
-1. Start MongoDB/backend with working credentials and Cloudinary config; verify the backend is reachable using the LAN IP.
+1. Start MongoDB/backend with working credentials and Cloudinary config; verify `/api/health` through the selected LAN or tunnel mode.
 2. Create `mobile/.env` from `.env.example`.
 3. Start Expo SDK 54 and open it in Expo Go 54.
 4. Log in with an applicant account.
@@ -151,11 +165,14 @@ The following must be checked on a device because this workspace cannot verify a
 
 ### The app opens but API calls fail
 
-- Replace `localhost` with the computer's LAN IP in `EXPO_PUBLIC_API_URL`.
-- Confirm the URL includes `/api` and has no accidental extra path.
-- Confirm backend is running, reachable from the phone browser, and not bound only to `127.0.0.1`.
+- In LAN mode, start with `npm run start:lan`; do not set a LAN address in `EXPO_PUBLIC_API_URL`.
+- If the phone and laptop are not on the same network, switch to the named backend tunnel and run `npm run start:tunnel`.
+- Fully reload Expo Go after changing `EXPO_PUBLIC_` values. LAN mode also needs a reconnect/reload after both devices move to a different LAN so Expo can issue a new `hostUri`.
+- Confirm tunnel/remote URLs use HTTPS, include `/api`, and return `200` from `/api/health`.
+- Confirm backend is running and listening on `0.0.0.0`; Docker must publish `5000:5000`.
 - Confirm Windows Firewall allows port 5000.
-- For HTTP standalone builds, platform security policy may require HTTPS or explicit configuration; Expo Go behavior is not a guarantee for future standalone builds.
+- In development, inspect the safe `[CVBuddy API]` console entries for method, URL, response status, duration, and error kind. Request bodies, passwords, and tokens are never logged.
+- `offline` means NetInfo reports no connection; `network` means the device is online but the backend/tunnel/DNS is unreachable; `timeout` means the backend did not answer before the request deadline.
 
 ### Camera does not work
 

@@ -1,0 +1,125 @@
+:root {
+  color-scheme: dark;
+
+  /* Core surfaces */
+  --color-background: #081020;
+  --color-surface: #0F1A2D;
+  --color-surface-secondary: #15243A;
+  --color-surface-elevated: #1B2D46;
+  --color-border: #263A54;
+  --color-border-subtle: #1C2B40;
+
+  /* Content */
+  --color-text-primary: #F8FAFC;
+  --color-text-secondary: #BCC9D9;
+  --color-text-muted: #8494AA;
+
+  /* Brand */
+  --color-primary: #4FCBDB;
+  --color-primary-hover: #68D8E5;
+  --color-primary-pressed: #31A9B9;
+  --color-primary-soft: #123544;
+  --color-text-on-primary: #06171B;
+
+  /* Semantic feedback */
+  --color-success: #3DD68C;
+  --color-success-background: #102F27;
+  --color-warning: #F2B84B;
+  --color-warning-background: #392B14;
+  --color-error: #FF7272;
+  --color-error-background: #3A1D25;
+  --color-info: #70A7FF;
+  --color-info-background: #172B4D;
+
+  /* Controls and layers */
+  --color-input-background: #0C1728;
+  --color-input-border: #2B405C;
+  --color-input-focus: #4FCBDB;
+  --color-disabled-background: #1C293B;
+  --color-disabled-text: #637187;
+  --color-overlay: rgba(3, 8, 17, 0.76);
+  --color-navigation: #0C1728;
+  --color-card: #0F1A2D;
+  --color-modal: #15243A;
+  --color-skeleton-base: #1C2B40;
+  --color-skeleton-highlight: #263A54;
+  --color-camera-background: #030711;
+  --color-camera-overlay-border: rgba(255, 255, 255, 0.16);
+  --color-camera-control-border: rgba(255, 255, 255, 0.12);
+  --color-shutter-border: rgba(255, 255, 255, 0.45);
+  --color-white: #FFFFFF;
+
+  /* Spacing */
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 12px;
+  --space-lg: 16px;
+  --space-xl: 20px;
+  --space-2xl: 24px;
+  --space-3xl: 32px;
+  --space-4xl: 40px;
+  --space-5xl: 48px;
+
+  /* Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 24px;
+  --radius-2xl: 28px;
+  --radius-pill: 999px;
+
+  /* Typography */
+  --font-sans: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-base: 16px;
+  --font-size-lg: 18px;
+  --font-size-xl: 22px;
+  --font-size-2xl: 28px;
+  --font-size-display: 36px;
+  --line-height-tight: 1.2;
+  --line-height-normal: 1.5;
+  --line-height-relaxed: 1.65;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+  --font-weight-heavy: 800;
+
+  /* Elevation and focus */
+  --shadow-card: 0 12px 32px rgba(0, 0, 0, 0.22);
+  --shadow-floating: 0 18px 48px rgba(0, 0, 0, 0.34);
+  --shadow-focus: 0 0 0 3px rgba(79, 203, 219, 0.22);
+  --shadow-brand: 0 10px 30px rgba(79, 203, 219, 0.20);
+}
+
+html,
+body,
+#root {
+  min-height: 100%;
+  background: var(--color-background);
+}
+
+body {
+  margin: 0;
+  color: var(--color-text-primary);
+  font-family: var(--font-sans);
+  font-size: var(--font-size-base);
+  line-height: var(--line-height-normal);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+*:focus-visible {
+  outline: none;
+  box-shadow: var(--shadow-focus);
+}
+
+::selection {
+  color: var(--color-text-on-primary);
+  background: var(--color-primary);
+}
