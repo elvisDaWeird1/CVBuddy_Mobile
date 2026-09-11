@@ -46,7 +46,7 @@ Fields sent by mobile:
 - `caption`: optional string, trimmed, maximum 500 characters.
 - `visibility`: `private`.
 
-Mobile does not send `applicantId`, Cloudinary fields, `status`, or `experienceId`. Backend defaults the status to `draft` and derives ownership from the JWT. The backend currently accepts JPG/JPEG, PNG, WEBP, MP4, PDF, DOC, and DOCX and defaults the portfolio file limit to 10 MB; mobile sends images only. The runtime must create the multipart boundary, so mobile does not set `Content-Type` manually.
+Mobile does not send `applicantId`, Cloudinary fields, `status`, or `experienceId`. Backend defaults the status to `draft` and derives ownership from the JWT. For Moment uploads, the backend accepts JPG/JPEG, PNG, WEBP, or MP4; mobile sends one image only. Each file must be non-empty and no larger than 5 MB; the backend accepts at most 5 `media` files per request. The runtime must create the multipart boundary, so mobile does not set `Content-Type` manually.
 
 Success data is `{ "moment": { ... } }`. A Moment contains `id`, `caption`, `capturedAt`, `status`, `visibility`, and `mediaAssets`; each asset has a displayable `secureUrl`.
 
