@@ -1,6 +1,7 @@
 import { apiRequest } from "@/src/api/api-client";
 import type { Pagination, PortfolioMoment } from "@/src/types/api";
 import type { CapturedPhoto } from "@/src/camera/captured-photo-context";
+import { Platform } from "react-native";
 
 type CreateMomentData = {
   moment: PortfolioMoment;
@@ -9,6 +10,25 @@ type CreateMomentData = {
 type MomentListResponse = {
   items: PortfolioMoment[];
   pagination?: Pagination;
+};
+
+const appendPhotoToFormData = async (formData: FormData, photo: CapturedPhoto) => {
+  if (Platform.OS !== "web") {
+    formData.append("media", {
+      uri: photo.uri,
+      name: photo.name,
+      type: photo.type
+    } as unknown as Blob);
+    return;
+  }
+
+  const response = await fetch(photo.uri);
+  if (!response.ok) {
+    throw new Error("Could not read the selected photo for upload.");
+  }
+
+  const blob = await response.blob();
+  formData.append("media", blob, photo.name);
 };
 
 export const createMoment = async ({
@@ -21,13 +41,7 @@ export const createMoment = async ({
   caption: string;
 }) => {
   const formData = new FormData();
-  const file = {
-    uri: photo.uri,
-    name: photo.name,
-    type: photo.type
-  };
-
-  formData.append("media", file as unknown as Blob);
+  await appendPhotoToFormData(formData, photo);
   formData.append("capturedAt", photo.capturedAt);
   formData.append("visibility", "private");
 
@@ -48,8 +62,8 @@ export const createMoment = async ({
   return response.data.moment;
 };
 
-export const listMoments = async (token: string) => {
-  const response = await apiRequest<PortfolioMoment[]>("/portfolio/moments?page=1&limit=20", { token });
+export const listMoments = async (token: string, signal?: AbortSignal) => {
+  const response = await apiRequest<PortfolioMoment[]>("/portfolio/moments?page=1&limit=20", { signal, token });
 
   return {
     items: response.data || [],

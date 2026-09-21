@@ -2,7 +2,7 @@
 
 Synchronized from the current backend route/controller/validation/Swagger source on 2026-07-11. The backend domain routes are the source of truth; this file only records what this mobile vertical slice uses.
 
-Base URL is configured by `EXPO_PUBLIC_API_URL` and must include `/api`.
+The base URL is resolved centrally and lazily in `src/config/env.ts`. LAN mode derives the host from Expo SDK 54's Metro/experience runtime URLs and appends the configured backend port plus `/api`. Deferring resolution until a request prevents Expo Router web/static imports from requiring a native Metro manifest. Tunnel/remote mode requires `EXPO_PUBLIC_API_URL` to be a complete HTTPS URL ending in `/api`.
 
 ## Login
 
@@ -46,7 +46,7 @@ Fields sent by mobile:
 - `caption`: optional string, trimmed, maximum 500 characters.
 - `visibility`: `private`.
 
-Mobile does not send `applicantId`, Cloudinary fields, `status`, or `experienceId`. Backend defaults the status to `draft` and derives ownership from the JWT. The backend currently accepts JPG/JPEG, PNG, WEBP, MP4, PDF, DOC, and DOCX and defaults the portfolio file limit to 10 MB; mobile sends images only. The runtime must create the multipart boundary, so mobile does not set `Content-Type` manually.
+Mobile does not send `applicantId`, Cloudinary fields, `status`, or `experienceId`. Backend defaults the status to `draft` and derives ownership from the JWT. For Moment uploads, the backend accepts JPG/JPEG, PNG, WEBP, or MP4; mobile sends one image only. Each file must be non-empty and no larger than 5 MB; the backend accepts at most 5 `media` files per request. The runtime must create the multipart boundary, so mobile does not set `Content-Type` manually.
 
 Success data is `{ "moment": { ... } }`. A Moment contains `id`, `caption`, `capturedAt`, `status`, `visibility`, and `mediaAssets`; each asset has a displayable `secureUrl`.
 
